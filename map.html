@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Maps with Routing</title>
+
+  <style>
+    #map {
+      height: 100vh; /* Full-screen map */
+      width: 100%;
+    }
+
+    #destination-input {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      padding: 10px;
+      background-color: white;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Input for destination -->
+  <div id="destination-input">
+    <label for="destination">Enter Destination Address: </label>
+    <input type="text" id="destination" placeholder="e.g., 1600 Amphitheatre Parkway, Mountain View, CA" />
+    <button onclick="routeToDestination()">Route Me</button>
+  </div>
+
+  <div id="map"></div> <!-- This is where the map will be displayed -->
+
+  <!-- Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtvAs1wPS5mkQD-p1PdPa_PS0ljHYyh5c
+&libraries=places"></script>
+
+  <script>
+    var map, directionsService, directionsRenderer, userLocation;
+
+    // Initialize the map and directions service
+    function initMap() {
+      directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer();
+
+      // Set default location (center of the map) to some place, e.g., London
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 51.505, lng: -0.09 },
+        zoom: 14
+      });
+
+      directionsRenderer.setMap(map);
+
+      // Try to get user's current location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          userLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
+          map.setCenter(userLocation);
+
+          // Add marker to show user's location
+          new google.maps.Marker({
+            position: userLocation,
+            map: map,
+            title: "You are here!"
+          });
+        });
+      } else {
+        alert('Geolocation not supported by this browser.');
+      }
+    }
+
+    // Function to route to destination
+    function routeToDestination() {
+      var destination = document.getElementById('destination').value;
+      if (!destination) {
+        alert('Please enter a valid destination address.');
+        return;
+      }
+
+      var request = {
+        origin: userLocation,
+        destination: destination,
+        travelMode: 'DRIVING'
+      };
+
+      directionsService.route(request, function (result, status) {
+        if (status === 'OK') {
+          directionsRenderer.setDirections(result);
+        } else {
+          alert('Directions request failed due to ' + status);
+        }
+      });
+    }
+
+    // Initialize the map when the page loads
+    window.onload = initMap;
+  </script>
+
+</body>
+</html>
+
+
